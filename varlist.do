@@ -5,6 +5,8 @@
 global DATA "~/meas_error/data"
 global RESULTS "~/meas_error/results"
 
+cd $RESULTS
+
    clear
 import delimited "$DATA/Data_Dictionary_Showcase.csv", delimiter(",")
 
@@ -30,6 +32,8 @@ import delimited "$DATA/Data_Dictionary_Showcase.csv", delimiter(",")
 
 *exclusion 5 - manually identified exclusions
    replace excl=5 if inlist(fieldid,20033,20034,84,87,92,4260)
+   replace excl=5 if inlist(fieldid,5983,5984,5986,5992,5993,396,397,398,399,400,403,404)
+   replace excl=5 if inlist(fieldid,20006,20008,20009,20010,20011)
    list fieldid field array if excl==5
 
    tab excl
@@ -68,11 +72,15 @@ export delimited using "$RESULTS/arrays.txt", delimiter(tab) replace
    expand array
    bysort fieldid instnum: gen arraynum=_n-1
 
+*some hearing fields have arrays that start at 1 and not 0
+   replace arraynum=arraynum+1 if inlist(fieldid,4230,4233,4241,4244)
+ 
    tostring fieldid, gen(fieldnum)
    tostring instnum, replace
    tostring arraynum, replace
 
    gen fieldcode=fieldnum + "-" + instnum + "." + arraynum
+
    drop fieldnum instnum arraynum instances
 
    count
