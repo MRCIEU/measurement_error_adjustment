@@ -62,8 +62,14 @@ forvalues pos = 2(2)`numvars' {
    post results (`fid') (`n') (`rho_c') (`se_rho_c') (`asym_ll') (`asym_ul') (`z_tr_ll') (`z_tr_ul') (`c_b') (`diff') (`sd_diff') (`loa_ll') (`loa_ul') (`rdm') (`fdm')	
 }   
 postclose results
-             
-use concordance_output.dta, clear  
+
+use used_vars_list.dta, clear
+
+merge 1:1 fieldid using concordance_output.dta, nogen keep(match using)
+
+gen r=rho_c/c_b
+
+save concordance_output.dta, replace
 
 export delimited "$RESULTS/concordance_output.csv", delimiter(",") replace
    
