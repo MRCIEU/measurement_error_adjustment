@@ -33,7 +33,7 @@ import delimited "$DATA/Data_Dictionary_Showcase.csv", delimiter(",")
 *exclusion 5 - manually identified exclusions
    replace excl=5 if inlist(fieldid,20033,20034,84,87,92,4260)
    replace excl=5 if inlist(fieldid,5983,5984,5986,5992,5993,396,397,398,399,400,403,404)
-   replace excl=5 if inlist(fieldid,20006,20008,20009,20010,20011)
+   replace excl=5 if inlist(fieldid,20006,20008,20009,20010,20011,40008)
    list fieldid field array if excl==5
 
    tab excl
