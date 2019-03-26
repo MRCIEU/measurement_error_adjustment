@@ -1,6 +1,11 @@
-/* this just tests out stata */
+/* this deals with specific fields with multiple values in one visit */
+/* we need to find the mean or minimum of these values */
 
-/* to run this do file you need to have arrays.txt and  */
+/* there is only one that uses coded values but we want the minimum */
+/* there are no array fields using the mean value that use coded values */
+
+/* to run this do file you need to have arrays.txt and finalfile.txt */
+/* amended 26032019 - comments only */
 
 global DATA "~/meas_error/data"
 global RESULTS "~/meas_error/results"
@@ -102,6 +107,8 @@ foreach fid in 4230 4233 4241 4244 {
 }
 
 *Interpolated age when cancer first diagnosed (minimum)
+*This also uses coded values of -1 and -3
+*If any have these values then the final value (minimum) should be this as these will be deleted next step
 foreach fid in 20007 {
    forvalues inst = 0/1 {
       gen min=.
