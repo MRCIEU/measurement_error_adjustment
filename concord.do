@@ -21,7 +21,7 @@ postfile results fieldid numdiff mean0 mean1 meandiff sd0 sd1 sddiff n rho_c se_
 forvalues pos = 2(2)`numvars' {
    local fieldname0 = word("`fidlist'",`pos')
    local fieldname1 = word("`fidlist'",`pos'+1)
-   local fid=subinstr(subinstr("`fieldname0'","v","",2),"_0_0","",1)
+   local fid=subinstr(subinstr("`fieldname0'","f_","",1),"_0_0","",1)
    forvalues i = 0(1)1 {
       quietly summ `fieldname`i'' if `fieldname0'<. & `fieldname1'<.
       local min`i'=r(min)

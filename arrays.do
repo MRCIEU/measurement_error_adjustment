@@ -14,6 +14,7 @@ cd $RESULTS
 
 clear
 import delimited "$RESULTS/finalfile.txt", delimiter(tab)
+save finalfile.dta, replace
 
 *Blood pressure fields (average)
 foreach fid in 93 94 95 102 4079 4080 {
@@ -21,11 +22,11 @@ foreach fid in 93 94 95 102 4079 4080 {
       gen num=0
       gen val=0
       forvalues count = 0/1 {
-         replace num=num+1 if v`fid'_`inst'_`count'v < .
-         replace val=val+v`fid'_`inst'_`count'v if v`fid'_`inst'_`count'v < .
-         drop v`fid'_`inst'_`count'v
+         replace num=num+1 if f_`fid'_`inst'_`count' < .
+         replace val=val+f_`fid'_`inst'_`count' if f_`fid'_`inst'_`count' < .
+         drop f_`fid'_`inst'_`count'
       }
-      gen v`fid'_`inst'_0v=val/num if num>0
+      gen f_`fid'_`inst'_0=val/num if num>0
       drop num val
    }
 }
@@ -35,11 +36,11 @@ foreach fid in 5084 5085 5086 5087 5088 5089 {
       gen num=0
       gen val=0
       forvalues count = 0/9 {
-         replace num=num+1 if v`fid'_`inst'_`count'v < .
-         replace val=val+v`fid'_`inst'_`count'v if v`fid'_`inst'_`count'v < .
-         drop v`fid'_`inst'_`count'v
+         replace num=num+1 if f_`fid'_`inst'_`count' < .
+         replace val=val+f_`fid'_`inst'_`count' if f_`fid'_`inst'_`count' < .
+         drop f_`fid'_`inst'_`count'
       }
-      gen v`fid'_`inst'_0v=val/num if num>0
+      gen f_`fid'_`inst'_0=val/num if num>0
       drop num val
    }
 }
@@ -50,11 +51,11 @@ forvalues fid = 5096/5119 {
       gen num=0
       gen val=0
       forvalues count = 0/5 {
-         replace num=num+1 if v`fid'_`inst'_`count'v < .
-         replace val=val+v`fid'_`inst'_`count'v if v`fid'_`inst'_`count'v < .
-         drop v`fid'_`inst'_`count'v
+         replace num=num+1 if f_`fid'_`inst'_`count' < .
+         replace val=val+f_`fid'_`inst'_`count' if f_`fid'_`inst'_`count' < .
+         drop f_`fid'_`inst'_`count'
       }
-      gen v`fid'_`inst'_0v=val/num if num>0
+      gen f_`fid'_`inst'_0=val/num if num>0
       drop num val
    }
 }
@@ -65,11 +66,11 @@ foreach fid in 5132 5133 5134 5135 5156 5157 5158 5159 5160 5161 5162 5163 {
       gen num=0
       gen val=0
       forvalues count = 0/5 {
-         replace num=num+1 if v`fid'_`inst'_`count'v < .
-         replace val=val+v`fid'_`inst'_`count'v if v`fid'_`inst'_`count'v < .
-         drop v`fid'_`inst'_`count'v
+         replace num=num+1 if f_`fid'_`inst'_`count' < .
+         replace val=val+f_`fid'_`inst'_`count' if f_`fid'_`inst'_`count' < .
+         drop f_`fid'_`inst'_`count'
       }
-      gen v`fid'_`inst'_0v=val/num if num>0
+      gen f_`fid'_`inst'_0=val/num if num>0
       drop num val
    }
 }
@@ -81,30 +82,49 @@ foreach fid in 3062 3063 3064 {
       gen num=0
       gen val=0
       forvalues count = 0/2 {
-         replace num=num+1 if v`fid'_`inst'_`count'v < .
-         replace val=val+v`fid'_`inst'_`count'v if v`fid'_`inst'_`count'v < .
-         drop v`fid'_`inst'_`count'v
+         replace num=num+1 if f_`fid'_`inst'_`count' < .
+         replace val=val+f_`fid'_`inst'_`count' if f_`fid'_`inst'_`count' < .
+         drop f_`fid'_`inst'_`count'
       }
-      gen v`fid'_`inst'_0v=val/num if num>0
+      gen f_`fid'_`inst'_0=val/num if num>0
       drop num val
    }
 }
 
 *Hearing fields array of 15 (average)
 *remember these arrays run from 1 to 15 and not 0 to 14
-foreach fid in 4230 4233 4241 4244 {
+foreach fid in 4230 4241 {
    forvalues inst = 0/1 {
       gen num=0
       gen val=0
       forvalues count = 1/15 {
-         replace num=num+1 if v`fid'_`inst'_`count'v < .
-         replace val=val+v`fid'_`inst'_`count'v if v`fid'_`inst'_`count'v < .
-         drop v`fid'_`inst'_`count'v
+         replace num=num+1 if f_`fid'_`inst'_`count' < .
+         replace val=val+f_`fid'_`inst'_`count' if f_`fid'_`inst'_`count' < .
+         drop f_`fid'_`inst'_`count'
       }
-      gen v`fid'_`inst'_0v=val/num if num>0
+      gen f_`fid'_`inst'_0=val/num if num>0
       drop num val
    }
 }
+
+*Hearing fields array of 15 but first 7 are default
+foreach fid in 4233 4244 {
+   forvalues inst = 0/1 {
+      gen num=0
+      gen val=0
+      forvalues count = 1/7 {
+         drop f_`fid'_`inst'_`count'
+      }
+      forvalues count = 8/15 {
+         replace num=num+1 if f_`fid'_`inst'_`count' < .
+         replace val=val+f_`fid'_`inst'_`count' if f_`fid'_`inst'_`count' < .
+         drop f_`fid'_`inst'_`count'
+      }
+      gen f_`fid'_`inst'_0=val/num if num>0
+      drop num val
+   }
+}
+
 
 *Interpolated age when cancer first diagnosed (minimum)
 *This also uses coded values of -1 and -3
@@ -113,10 +133,10 @@ foreach fid in 20007 {
    forvalues inst = 0/1 {
       gen min=.
       forvalues count = 0/5 {
-         replace min=v`fid'_`inst'_`count'v if v`fid'_`inst'_`count'v < min
-         drop v`fid'_`inst'_`count'v
+         replace min=f_`fid'_`inst'_`count' if f_`fid'_`inst'_`count' < min
+         drop f_`fid'_`inst'_`count'
       }
-      gen v`fid'_`inst'_0v = min
+      gen f_`fid'_`inst'_0 = min
       drop min
    }
 }

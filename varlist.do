@@ -79,7 +79,7 @@ export delimited using "$RESULTS/arrays.txt", delimiter(tab) replace
    tostring instnum, replace
    tostring arraynum, replace
 
-   gen fieldcode=fieldnum + "-" + instnum + "." + arraynum
+   gen fieldcode="f." + fieldnum + "." + instnum + "." + arraynum
 
    drop fieldnum instnum arraynum instances
 
