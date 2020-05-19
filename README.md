@@ -4,8 +4,8 @@ Environment:
 Uses Stata15
 
 Set directories temporarily at the top of  the Stata do files with:
-global DATA "~/meas_error/data"
-global RESULTS "~/meas_error/results"
+global DATA "home/meas_error/data"
+global RESULTS "home/meas_error/results"
 
 Data needed:
 Must have a data file of phenotype data called ukbdata.csv, a list of wihtdrawn participants if necessary and in my case and extra ukb file with some date fields new_datas_data.csv plus a data dictionary from the UK Biobank Showcase
