@@ -21,7 +21,7 @@ varlist.sh runs varlist.do
 getdata.sh 
    extracts the varlist fields from the main data
 
-exclusions.sh run exclusions.do
+exclusions.sh runs exclusions.do
    merges the output from the last script with the list of withdrawn participants to remove them and also adds on the date fields that were in a separate file
    
 arrays.sh runs arrays.do
@@ -34,9 +34,5 @@ check20.sh runs check20.do
    Then this checks for at least 20 distinct values (not counting missing) from observations that contain 
    non missing values for both instances.
 
-concord.sh run concord.do
-  this completed the concordance analysis and produces bland altman plots for the remaining variables.
-
-checks.do
-this does some final checks of the output
-
+concord.sh runs concord.do
+  this completesukbio the concordance analysis for the remaining variables.
