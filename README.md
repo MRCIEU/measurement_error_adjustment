@@ -35,4 +35,6 @@ check20.sh runs check20.do
    non missing values for both instances.
 
 concord.sh runs concord.do
-  this completesukbio the concordance analysis for the remaining variables.
+  this completes the concordance analysis for the remaining variables.
+  
+There are extra files to run the example, getmodeldata, modelexcl and runmodels.
