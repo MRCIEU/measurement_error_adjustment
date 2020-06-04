@@ -4,8 +4,7 @@
 /* there is only one that uses coded values but we want the minimum */
 /* there are no array fields using the mean value that use coded values */
 
-/* to run this do file you need to have arrays.txt and finalfile.txt */
-/* amended 26032019 - comments only */
+/* to run this do file you need to have finalfile.dta */
 
 global DATA "~/meas_error/data"
 global RESULTS "~/meas_error/results"
@@ -13,8 +12,7 @@ global RESULTS "~/meas_error/results"
 cd $RESULTS 
 
 clear
-import delimited "$RESULTS/finalfile.txt", delimiter(tab)
-save finalfile.dta, replace
+use finalfile, clear
 
 *Blood pressure fields (average)
 foreach fid in 93 94 95 102 4079 4080 {
@@ -141,6 +139,9 @@ foreach fid in 20007 {
    }
 }
 
+order _all, alphabetic
+order f_eid, first
+order assess_date0 assess_date1 sample_date0 sample_date1 diet_date0 diet_date1 assess_td sample_td diet_td, last
 save arraysfixed.dta, replace
 
 *show the final variables (check they all end in 0)

@@ -1,7 +1,8 @@
-/* this do file amends some of the special coded values then checks and removes 
+/* this do file amends some of the special coded values and reformats and renames the date fields, then checks and removes 
    a) variables with <20 distinct values per instance (for observations non missing in both instances)
    b) variables with less than 100 observations non missing in both instances
    c) variables with >=20% of non missing observations having one single value (should be categorical) */
+
 
 /* needs arraysfixed.dta */
 /* amended 26032019 - to set -10 to 0.5 */
@@ -12,6 +13,8 @@ global DATA "~/meas_error/data"
 cd $RESULTS
 
 use $RESULTS/arraysfixed.dta, clear
+
+ds
 
 /* amend default values on those that use them */
 
@@ -95,6 +98,7 @@ foreach vnum in 2734 {
    }
 }
     
+save decoded.dta, replace
 
 /* check that there are at least 20 distinct values in observations with two instances, */
 /* that there are at least 100 observations with repeats, */
@@ -102,7 +106,7 @@ foreach vnum in 2734 {
 
 ds
 local fidlist=r(varlist)
-local numvars=wordcount("`fidlist'")
+local numvars=wordcount("`fidlist'")-9
 disp "Number of variables = `numvars'"
 
 local exclncount=0

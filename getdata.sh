@@ -1,8 +1,8 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=1
 #PBS -l walltime=02:00:00
-#PBS -o output-check
-#PBS -e errors-check
+#PBS -o getdata_log
+#PBS -e getdata_error
 #----------------------------------------
 
 # on compute node, change directory to data directory:
