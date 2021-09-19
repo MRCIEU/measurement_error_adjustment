@@ -9,7 +9,7 @@ global RESULTS "~/meas_error/results"
 
 cd $RESULTS
 
-import delimited f_eid using "$DATA/w16729_20200204.csv", delimiter(",") clear
+import delimited f_eid using "$DATA/w16729_20210809.csv", delimiter(",") clear
 sort f_eid
 save exclusions.dta, replace
 
