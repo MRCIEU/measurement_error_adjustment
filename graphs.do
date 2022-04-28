@@ -6,7 +6,16 @@ cd $RESULTS
 ssc install metan
 ssc install labutil
 
-*spreadsheet can be reuploaded with better labels
+ /*
+use concordance_output01.dta, clear
+gen type="Baseline"
+replace type="Online" if online==1
+drop online
+append using concordance_output23.dta
+replace type="Imaging" if type==""
+   */
+
+*read in from spreadsheet instead for better shortnames
 import excel fieldid field short_name category highcat instances numdiff ///
              mth_diff_median mth_diff_iqr mean0 mean1 meandiff sddiff rho_c ///
 			 ccc_asym_ci corr c_b icc icc_ci lamda_p var_lamda_p ///
@@ -18,6 +27,7 @@ drop if fieldid==.
 gen type="Baseline"
 save concordance_output_baseline.dta, replace
 
+*read in from spreadsheet instead for better shortnames
 import excel fieldid field short_name category highcat instances numdiff ///
              mth_diff_median mth_diff_iqr mean0 mean1 meandiff sddiff rho_c ///
 			 ccc_asym_ci corr c_b icc icc_ci lamda_p var_lamda_p ///
@@ -29,6 +39,7 @@ drop if fieldid==.
 gen type="Online"
 save concordance_output_online.dta, replace
 
+*read in from spreadsheet instead for better shortnames
 import excel fieldid field short_name category highcat instances numdiff ///
              mth_diff_median mth_diff_iqr mean0 mean1 meandiff sddiff rho_c ///
 			 ccc_asym_ci corr c_b icc icc_ci lamda_p var_lamda_p ///
@@ -44,6 +55,8 @@ clear
 append using concordance_output_baseline concordance_output_online concordance_output_imaging
 
 tab type, missing
+
+hist rho_c
 
 *group the concordance into bands
 gen conctyp=1
@@ -104,127 +117,138 @@ save concordance_output_all, replace
 *Baseline and online graphs
 use concordance_output_all, clear
 keep if type=="Baseline" | type=="Online"
-gsort + supercat + fieldid
-
-
-* manhattan plot of ccc - baseline
+*randomise the order for the graphs
+gen randnum= uniform()
+gsort + supercat + randnum
 gen num=_n
-twoway (scatter rho_c num if supercat==1, ms(o) msize(vsmall) mcol(red) ///
-       yline(0.9, lpattern(longdash) lwidth(thin) lcolor(gs5)) ///
-       yline(0.95, lpattern(dash) lwidth(thin) lcolor(gs5)) ///
-	   yline(0.99, lpattern(shortdash) lwidth(thin) lcolor(gs5))) ///   
-       (scatter rho_c num if supercat==2, ms(o) msize(vsmall) mcol(orange)) ///
-       (scatter rho_c num if supercat==3, ms(o) msize(vsmall) mcol(yellow)) ///
-	   (scatter rho_c num if supercat==4, ms(o) msize(vsmall) mcol(lime)) ///
-       (scatter rho_c num if supercat==5, ms(o) msize(vsmall) mcol(green)) ///
-       (scatter rho_c num if supercat==6, ms(o) msize(vsmall) mcol(cyan)) ///
-       (scatter rho_c num if supercat==7, ms(o) msize(vsmall) mcol(blue)) ///
-       (scatter rho_c num if supercat==8, ms(o) msize(vsmall) mcol(magenta)) ///
-       (scatter rho_c num if supercat==9, ms(o) msize(vsmall) mcol(brown)) ///
-       (scatter rho_c num if supercat==99, ms(o) msize(vsmall) mcol(black)), ///
-	   legend(off) ylab(0(0.1)1 0.9 "Moderate 0.9" 0.95 "Substantial 0.95" ///
-	   0.99 "Perfect 0.99      ", format(%2.1f) labsize(vsmall) angle(horiz)) ///
-	   xlab(20 "Anthropometry" 65 "Eye measures" 107 "Physical measures" ///
-	   153 "Biomarkers" 202 "ID antigens" 227 "Diet by 24hr recall" ///
-	   251 "Medical history" 274 "Lifestyle" 400 "Metabolomics" ///
-	   535 "Other", angle(45) labsize(vsmall) noticks) ///
-	   ytitle("Lin's CCC", margin(vsmall)) ///
-       xtitle("Category") plotregion(color(white)) graphregion(color(white)) ///
-       name(manhat, replace)	
-	   
-graph save "Manhattan Summary", replace
-graph export "Manhattan Summary.pdf", replace
-graph export "Manhattan Summary.jpg", height(5000) replace
-graph close _all
 
+* manhattan plot of icc - baseline
+twoway (scatter icc /*rho_c*/ num if supercat==1, ms(o) msize(vsmall) mcol(red) ///
+       /*yline(0.9, lpattern(longdash) lwidth(thin) lcolor(gs5))*/ ///
+       /*yline(0.95, lpattern(dash) lwidth(thin) lcolor(gs5))*/ ///
+	   /*yline(0.99, lpattern(shortdash) lwidth(thin) lcolor(gs5))*/) ///   
+       (scatter icc num if supercat==2, ms(o) msize(vsmall) mcol(cyan)) ///
+       (scatter icc num if supercat==3, ms(o) msize(vsmall) mcol(orange)) ///
+	   (scatter icc num if supercat==4, ms(o) msize(vsmall) mcol(lime)) ///
+       (scatter icc num if supercat==5, ms(o) msize(vsmall) mcol(magenta)) ///
+       (scatter icc num if supercat==6, ms(o) msize(vsmall) mcol(green)) ///
+       (scatter icc num if supercat==7, ms(o) msize(vsmall) mcol(gold)) ///
+       (scatter icc num if supercat==8, ms(o) msize(vsmall) mcol(blue)) ///
+       (scatter icc num if supercat==9, ms(o) msize(vsmall) mcol(pink)) ///
+       (scatter icc num if supercat==99, ms(o) msize(vsmall) mcol(black)), ///
+	   ylab(-0.2(0.1)1 /*0.9 "Moderate > 0.9" 0.95 "Substantial > 0.95"*/ ///
+	   /*0.99 "Perfect > 0.99      "*/, format(%2.1f) labsize(vsmall) angle(horiz)) ///
+	   xlab(none) ///
+	   legend(title("Category", size(small)) span order(1 2 3 4 5 6 7 8 9 10) size(2) cols(5) region(lcolor(white)) ///
+	   label(1 "Anthropometry") label(2 "Eye measures") label(3 "Physical measures") label(4 "Biomarkers") ///
+       label(5 "Infectious disease antigens") label(6 "Diet by 24hr recall") label(7 "Medical History") ///
+	   label(8 "Lifestyle") label(9 "Metabolomics") label(10 "Other")) ///
+	   ytitle(/*"Lin's CCC"*/"Intraclass Correlation Coefficient", margin(vsmall)) ///
+       xtitle("Variables (randomly within category)", size(small)) plotregion(color(white)) graphregion(color(white)) ///
+       name(manhat, replace)	
+
+	/* xlab(20 "Anthropometry" 65 "Eye measures" 107 "Physical measures" ///
+	   153 "Biomarkers" 195 "Infectious disease antigens" 227 "Diet by 24hr recall" ///
+	   251 "Medical history" 274 "Lifestyle" 400 "Metabolomics" ///
+	   535 "Other", angle(45) labsize(vsmall) noticks) /// */
+
+	   
+graph save "$RESULTS/Manhattan ICC Summary", replace
+graph export "$RESULTS/Manhattan ICC Summary.tif", width(5000) replace
 drop num
 
 * scatter plot of pearson by bias correction
 list fieldid field if c_b<=0.5
 
 twoway (scatter c_b pearson if highcat=="Anthropometry" & c_b>0.5, ms(o) msize(vsmall) mcol(red)) ///  
-       (scatter c_b pearson if highcat=="Eye measures" & c_b>0.5, ms(D) msize(vsmall) mcol(orange)) ///
-       (scatter c_b pearson if highcat=="Physical Measures" & c_b>0.5, ms(T) msize(vsmall) mcol(yellow)) ///
+       (scatter c_b pearson if highcat=="Eye measures" & c_b>0.5, ms(D) msize(vsmall) mcol(cyan)) ///
+       (scatter c_b pearson if highcat=="Physical Measures" & c_b>0.5, ms(T) msize(vsmall) mcol(orange)) ///
 	   (scatter c_b pearson if highcat=="Biomarkers" & c_b>0.5, ms(S) msize(vsmall) mcol(lime)) ///
-       (scatter c_b pearson if highcat=="Infectious disease antigens" & c_b>0.5, ms(+) msize(vsmall) mcol(green)) ///
-       (scatter c_b pearson if highcat=="Diet by 24hr recall" & c_b>0.5, ms(X) msize(vsmall) mcol(cyan)) ///
-       (scatter c_b pearson if highcat=="Medical history" & c_b>0.5, ms(A) msize(vsmall) mcol(blue)) ///
-       (scatter c_b pearson if highcat=="Lifestyle" & c_b>0.5, ms(|) msize(vsmall) mcol(magenta)) ///
-       (scatter c_b pearson if highcat=="Metabolomics" & c_b>0.5, ms(V) msize(vsmall) mcol(brown))  ///
+       (scatter c_b pearson if highcat=="Infectious disease antigens" & c_b>0.5, ms(+) msize(vsmall) mcol(magenta)) ///
+       (scatter c_b pearson if highcat=="Diet by 24hr recall" & c_b>0.5, ms(X) msize(vsmall) mcol(green)) ///
+       (scatter c_b pearson if highcat=="Medical history" & c_b>0.5, ms(A) msize(vsmall) mcol(gold)) ///
+       (scatter c_b pearson if highcat=="Lifestyle" & c_b>0.5, ms(|) msize(vsmall) mcol(blue)) ///
+       (scatter c_b pearson if highcat=="Metabolomics" & c_b>0.5, ms(V) msize(vsmall) mcol(pink))  ///
        (scatter c_b pearson if highcat=="Other" & c_b>0.5, ms(a) msize(vsmall) mcol(black)), ///
-	   legend(order(1 2 3 4 5 6 7 8 9 10) span title("Category", size(vsmall)) size(2) cols(5) ///
+	   legend(order(1 2 3 4 5 6 7 8 9 10) span title("Category", size(small)) size(2) cols(5) region(lcolor(white)) ///
 	   label(1 "Anthropometry") label(2 "Eye measures") label(3 "Physical measures") label(4 "Biomarkers") ///
-       label(5 "ID antigens") label(6 "Diet by 24hr recall") label(7 "Medical history") ///
+       label(5 "Infectious disease antigens") label(6 "Diet by 24hr recall") label(7 "Medical history") ///
        label(8 "Lifestyle") label(9 "Metabolomics") label(10 "Other")) ///
 	   ylab(0.5(0.1)1, format(%2.1f) labsize(vsmall) angle(horiz)) ///
 	   xlab(0(0.1)1, format(%2.1f) labsize(vsmall)) ///
 	   ytitle("Accuracy Coefficient") aspectratio(1) ///
-       xtitle("Pearson's Correlation") plotregion(color(white) margin(0)) graphregion(color(white)) ///
+       xtitle("Pearson's Correlation Coefficient") plotregion(color(white) margin(0)) graphregion(color(white)) ///
        name(scatsum, replace)
 	   	   
-graph save "Scatter rho c_b summary", replace
-graph export "Scatter rho c_b summary.pdf", replace
-graph export "Scatter rho c_b summary.jpg", height(5000) replace
-graph close _all
+graph save "$RESULTS/Scatter rho c_b summary", replace
+graph export "$RESULTS/Scatter rho c_b summary.tif", width(5000) replace
 
-
-* scatter plot of CCC by ICC
+  /*
+* scatter plot of CCC by ICC by category
 twoway (scatter rho_c icc if highcat=="Anthropometry", ms(o) msize(vsmall) mcol(red)) ///  
-       (scatter rho_c icc if highcat=="Eye measures", ms(D) msize(vsmall) mcol(orange)) ///
-       (scatter rho_c icc if highcat=="Physical Measures", ms(T) msize(vsmall) mcol(yellow)) ///
+       (scatter rho_c icc if highcat=="Eye measures", ms(D) msize(vsmall) mcol(cyan)) ///
+       (scatter rho_c icc if highcat=="Physical Measures", ms(T) msize(vsmall) mcol(orange)) ///
 	   (scatter rho_c icc if highcat=="Biomarkers", ms(S) msize(vsmall) mcol(lime)) ///
-       (scatter rho_c icc if highcat=="Infectious disease antigens", ms(+) msize(vsmall) mcol(green)) ///
-       (scatter rho_c icc if highcat=="Diet by 24hr recall", ms(X) msize(vsmall) mcol(cyan)) ///
-       (scatter rho_c icc if highcat=="Medical history", ms(A) msize(vsmall) mcol(blue)) ///
-       (scatter rho_c icc if highcat=="Lifestyle", ms(|) msize(vsmall) mcol(magenta)) ///
-       (scatter rho_c icc if highcat=="Metabolomics", ms(V) msize(vsmall) mcol(brown))  ///
+       (scatter rho_c icc if highcat=="Infectious disease antigens", ms(+) msize(vsmall) mcol(magenta)) ///
+       (scatter rho_c icc if highcat=="Diet by 24hr recall", ms(X) msize(vsmall) mcol(green)) ///
+       (scatter rho_c icc if highcat=="Medical history", ms(A) msize(vsmall) mcol(gold)) ///
+       (scatter rho_c icc if highcat=="Lifestyle", ms(|) msize(vsmall) mcol(blue)) ///
+       (scatter rho_c icc if highcat=="Metabolomics", ms(V) msize(vsmall) mcol(pink))  ///
        (scatter rho_c icc if highcat=="Other", ms(a) msize(vsmall) mcol(black)), ///
-	   legend(order(1 2 3 4 5 6 7 8 9 10) span title("Category", size(vsmall)) size(2) cols(5) ///
+	   legend(order(1 2 3 4 5 6 7 8 9 10) span title("Category", size(small)) size(2) cols(5) region(lcolor(white)) ///
 	   label(1 "Anthropometry") label(2 "Eye measures") label(3 "Physical measures") label(4 "Biomarkers") ///
-       label(5 "ID antigens") label(6 "Diet by 24hr recall") label(7 "Medical history") ///
+       label(5 "Infectious disease antigens") label(6 "Diet by 24hr recall") label(7 "Medical history") ///
        label(8 "Lifestyle") label(9 "Metabolomics") label(10 "Other")) ///
 	   ylab(0(0.1)1, format(%2.1f) labsize(vsmall) angle(horiz)) ///
 	   xlab(-0.2(0.1)1, format(%2.1f) labsize(vsmall)) ///
-	   ytitle("CCC") aspectratio(1) ///
-       xtitle("ICC") plotregion(color(white) margin(0)) graphregion(color(white)) ///
+	   ytitle("Concordance Correlation Coefficient") aspectratio(1) ///
+       xtitle("Intraclass Correlation Coefficient") plotregion(color(white) margin(0)) graphregion(color(white)) ///
        name(cccicc, replace)
 	   	   
-graph save "Scatter ccc icc summary", replace
-graph export "Scatter ccc icc summary.pdf", replace
-graph export "Scatter ccc icc summary.jpg", height(5000) replace
-graph close _all
+graph save "$RESULTS/Scatter ccc icc summary", replace
+graph export "$RESULTS/Scatter ccc icc summary.tif", width(5000) replace
+  */
+* scatter plot of CCC by ICC all together
+twoway (scatter rho_c icc, msize(vsmall) mcol(blue)), ///  
+	   ylab(0(0.1)1, format(%2.1f) labsize(vsmall) angle(horiz)) xline(0, lcolor(black)) ///
+	   xlab(-0.2(0.1)1, format(%2.1f) labsize(vsmall)) ///
+	   ytitle("Concordance Correlation Coefficient") aspectratio(1) ///
+       xtitle("Intraclass Correlation Coefficient") plotregion(color(white) margin(0)) graphregion(color(white)) ///
+       name(cccicc, replace)
+	   
+graph save "$RESULTS/Scatter ccc icc summary", replace
+graph export "$RESULTS/Scatter ccc icc summary.tif", width(5000) replace
 
 *Imaging graphs
 use concordance_output_all, clear
 keep if type=="Imaging"
-gsort + supercat + fieldid
-
-* manhattan plot of ccc - imaging
+*randomise the order for the graphs
+gen randnum= uniform()
+gsort + supercat + randnum
 gen num=_n
-twoway (scatter rho_c num if supercat==1, ms(o) msize(vsmall) mcol(red) ///
-       yline(0.9, lpattern(longdash) lwidth(thin) lcolor(gs5)) ///
-       yline(0.95, lpattern(dash) lwidth(thin) lcolor(gs5)) ///
-	   yline(0.99, lpattern(shortdash) lwidth(thin) lcolor(gs5))) ///   
-       (scatter rho_c num if supercat==3, ms(o) msize(vsmall) mcol(orange)) ///
-       (scatter rho_c num if supercat==10, ms(o) msize(vsmall) mcol(green)) ///
-	   (scatter rho_c num if supercat==11, ms(o) msize(vsmall) mcol(magenta)) ///
-       (scatter rho_c num if supercat==12, ms(o) msize(vsmall) mcol(midblue)) ///
-       (scatter rho_c num if supercat==99, ms(o) msize(vsmall) mcol(black)), ///
-	   ylab(0(0.1)1 0.9 "Moderate 0.9" 0.95 "Substantial 0.95" ///
-	   0.99 "Perfect 0.99      ", format(%2.1f) labsize(vsmall) angle(horiz)) ///
+
+* manhattan plot of icc - imaging
+twoway (scatter icc num if supercat==1, ms(o) msize(vsmall) mcol(red) ///
+       /*yline(0.9, lpattern(longdash) lwidth(thin) lcolor(gs5))*/ ///
+       /*yline(0.95, lpattern(dash) lwidth(thin) lcolor(gs5))*/ ///
+	   /*yline(0.99, lpattern(shortdash) lwidth(thin) lcolor(gs5))*/) ///   
+       (scatter icc num if supercat==3, ms(o) msize(vsmall) mcol(cyan)) ///
+       (scatter icc num if supercat==10, ms(o) msize(vsmall) mcol(orange)) ///
+	   (scatter icc num if supercat==11, ms(o) msize(vsmall) mcol(lime)) ///
+       (scatter icc num if supercat==12, ms(o) msize(vsmall) mcol(magenta)) ///
+       (scatter icc num if supercat==99, ms(o) msize(vsmall) mcol(black)), ///
+	   ylab(0(0.1)1 /*0.9 "Moderate > 0.9" 0.95 "Substantial > 0.95"*/ ///
+	   /*0.99 "Perfect > 0.99      "*/, format(%2.1f) labsize(vsmall) angle(horiz)) ///
 	   xlab(none) ///
-	   legend(order(1 2 3 4 5 6) size(2) cols(3) ///
+	   legend(order(1 2 3 4 5 6) title("Category", size(small)) span size(2) cols(6) region(lcolor(white)) ///
 	   label(1 "Anthropometry") label(2 "Physical measures") label(3 "DXA scan") ///
        label(4 "Heart MRI") label(5 "Brain MRI") label(6 "Other")) ///
-	   ytitle("Lin's CCC", margin(vsmall)) ///
-       xtitle("Category") plotregion(color(white)) graphregion(color(white)) ///
+	   ytitle(/*"Lin's CCC"*/"Intraclass Correlation Coefficient", margin(vsmall)) ///
+       xtitle("Variables (randomly within category)", size(small)) plotregion(color(white)) graphregion(color(white)) ///
        name(manhat_i, replace)	
 	   
-graph save "Manhattan Summary i", replace
-graph export "Manhattan Summary i.pdf", replace
-graph export "Manhattan Summary i.jpg", height(5000) replace
-graph close _all
-
+graph save "$RESULTS/Manhattan ICC Summary i", replace
+graph export "$RESULTS/Manhattan ICC Summary i.tif", width(5000) replace
 drop num
 
 tab supercat
@@ -232,13 +256,13 @@ tab supercat
 * scatter plot of pearson by bias correction
 list fieldid field c_b if c_b<=0.5
 * scatter plot of pearson by bias correction
-twoway (scatter c_b pearson if highcat=="Brain MRI", ms(V) msize(vsmall) mcol(midblue))  ///
+twoway (scatter c_b pearson if highcat=="Brain MRI", ms(V) msize(vsmall) mcol(magenta))  ///
 	   (scatter c_b pearson if highcat=="Anthropometry", ms(o) msize(vsmall) mcol(red)) ///  
-       (scatter c_b pearson if highcat=="Physical Measures", ms(T) msize(vsmall) mcol(orange)) ///
-       (scatter c_b pearson if highcat=="DXA scan", ms(X) msize(vsmall) mcol(green))  ///
-       (scatter c_b pearson if highcat=="Heart MRI" & c_b>0.5, ms(A) msize(vsmall) mcol(magenta))  ///
+       (scatter c_b pearson if highcat=="Physical Measures", ms(T) msize(vsmall) mcol(cyan)) ///
+       (scatter c_b pearson if highcat=="DXA scan", ms(X) msize(vsmall) mcol(orange))  ///
+       (scatter c_b pearson if highcat=="Heart MRI" & c_b>0.5, ms(A) msize(vsmall) mcol(lime))  ///
        (scatter c_b pearson if highcat=="Other", ms(+) msize(vsmall) mcol(black)), ///
-	   legend(order(2 3 4 5 1 6) title("Category", size(vsmall)) span size(2) cols(3) ///
+	   legend(order(2 3 4 5 1 6) title("Category", size(vsmall)) span size(2) cols(3) region(lcolor(white)) ///
 	   label(1 "Brain MRI") label(2 "Anthropometry") label(3 "Physical measures") ///
 	   label(4 "DXA scan") label(5 "Heart MRI")  label(6 "Other")) ///
 	   ylab(0.5(0.1)1, format(%2.1f) labsize(vsmall) angle(horiz)) ///
@@ -247,20 +271,18 @@ twoway (scatter c_b pearson if highcat=="Brain MRI", ms(V) msize(vsmall) mcol(mi
        xtitle("Pearson's Correlation") plotregion(color(white) margin(0)) graphregion(color(white)) ///
        name(scatsum_i, replace)
 	   	   
-graph save "Scatter rho c_b summary i", replace
-graph export "Scatter rho c_b summary i.pdf", replace
-graph export "Scatter rho c_b summary i.jpg", height(5000) replace
+graph save "$RESULTS/Scatter rho c_b summary i", replace
+graph export "$RESULTS/Scatter rho c_b summary i.tif", width(5000) replace
 
-graph close _all
-
-* scatter plot of CCC by ICC
-twoway (scatter rho_c icc if highcat=="Brain MRI", ms(V) msize(vsmall) mcol(midblue)) ///  
-       (scatter rho_c icc if highcat=="Anthropometry", ms(o) msize(vsmall) mcol(red)) ///  
-       (scatter rho_c icc if highcat=="Physical Measures", ms(T) msize(vsmall) mcol(orange)) ///
-       (scatter rho_c icc if highcat=="DXA scan", ms(X) msize(vsmall) mcol(green)) ///
-       (scatter rho_c icc if highcat=="Heart MRI", ms(A) msize(vsmall) mcol(magenta)) ///
+ /*
+* scatter plot of CCC by ICC by category
+twoway (scatter rho_c icc if highcat=="Brain MRI", ms(V) msize(vsmall) mcol(magenta)) ///  
+	   (scatter rho_c icc if highcat=="Anthropometry", ms(o) msize(vsmall) mcol(red)) /// 
+       (scatter rho_c icc if highcat=="Physical Measures", ms(T) msize(vsmall) mcol(cyan)) ///
+       (scatter rho_c icc if highcat=="DXA scan", ms(X) msize(vsmall) mcol(orange)) ///
+       (scatter rho_c icc if highcat=="Heart MRI", ms(A) msize(vsmall) mcol(lime)) ///
        (scatter rho_c icc if highcat=="Other", ms(+) msize(vsmall) mcol(black)), ///
-	   legend(order(2 3 4 5 1 6) span title("Category", size(vsmall)) size(2) cols(3) ///
+	   legend(order(2 3 4 5 1 6) span title("Category", size(vsmall)) size(2) cols(3) region(lcolor(white)) ///
 	   label(1 "Brain MRI") label(2 "Anthropometry") label(3 "Physical measures") ///
 	   label(4 "DXA scan") label(5 "Heart MRI")  label(6 "Other")) ///
 	   ylab(0(0.1)1, format(%2.1f) labsize(vsmall) angle(horiz)) ///
@@ -269,12 +291,19 @@ twoway (scatter rho_c icc if highcat=="Brain MRI", ms(V) msize(vsmall) mcol(midb
        xtitle("ICC") plotregion(color(white) margin(0)) graphregion(color(white)) ///
        name(cccicc_i, replace)
 	   	   
-graph save "Scatter ccc icc summary i", replace
-graph export "Scatter ccc icc summary i.pdf", replace
-graph export "Scatter ccc icc summary i.jpg", height(5000) replace
+graph save "$RESULTS/Scatter ccc icc summary i", replace
+graph export "$RESULTS/Scatter ccc icc summary i.tif", width(5000) replace
+  */
+* scatter plot of CCC by ICC all together
+twoway (scatter rho_c icc, msize(vsmall) mcol(green)), ///  
+	   ylab(0(0.1)1, format(%2.1f) labsize(vsmall) angle(horiz)) ///
+	   xlab(-0.2(0.1)1, format(%2.1f) labsize(vsmall)) ///
+	   ytitle("Concordance Correlation Coefficient") aspectratio(1) ///
+       xtitle("Intraclass Correlation Coefficient") plotregion(color(white) margin(0)) graphregion(color(white)) ///
+       name(cccicc_i, replace)
 
-graph close _all
-
+graph save "$RESULTS/Scatter ccc icc summary i", replace
+graph export "$RESULTS/Scatter ccc icc summary i.tif", width(5000) replace
 
 *Category graphs for all
 foreach i in "Anthropometry" "Eye measures" "Physical measures" "Biomarkers" ///
@@ -295,31 +324,23 @@ gen temp_num=fnum-0.4
 local ysize=min(int(6+`num'/3.5),20)
 disp "ysize is `ysize'"
 
-twoway (rspike asym_ll asym_ul fnum, horizontal clw(vvthin) clc(blue) xaxis(1 2) ///
-       xline(0.9, lpattern(longdash) lwidth(thin) lcolor(gs5)) ///
-       xline(0.95, lpattern(dash) lwidth(thin) lcolor(gs5)) ///
-	   xline(0.99, lpattern(shortdash) lwidth(thin) lcolor(gs5))) ///	   
-       (scatter fnum rho_c, ms(o) msize(vsmall) mcol(red)) ///
-       (scatter temp_num pearson, ms(s) msize(tiny) mcol(green)) ///
-       (scatter temp_num c_b if meandiff<0, ms(t) msangle(180) msize(tiny) mcol(orange)) ///
-       (scatter temp_num c_b if meandiff>=0, ms(t) msize(tiny) mcol(orange)), ///
-	   legend(order (- 2 1 - - "Breakdown of CCC:" 3 4 5) size(1.5) cols(2) span colfirst textfirst ///
+twoway (rspike icc_cill icc_ciul fnum, horizontal clw(vvthin) clc(blue)) ///
+       (scatter fnum icc, ms(o) msize(vsmall) mcol(red)) ///
+       (scatter fnum c_b if meandiff<0, ms(t) msangle(180) msize(tiny) mcol(orange)) ///
+       (scatter fnum c_b if meandiff>=0, ms(t) msize(tiny) mcol(orange)), ///
+	   legend(order (- 2 1 - "Accuracy coefficient:" 3 4) size(1.5) cols(2) span colfirst textfirst ///
 	   label(1 "95% Confidence Interval") ///
-	   label(2 "Lin's CCC") ///
-	   label(3 "Pearson's Correlation") ///
-	   label(4 "Accuracy Coefficient, mean of repeat < baseline") ///
-	   label(5 "Accuracy Coefficient, mean of repeat > baseline")) ///
+	   label(2 "Intraclass Correlation Coefficient") ///
+	   label(3 "mean of repeat < baseline") ///
+	   label(4 "mean of repeat > baseline")) ///
 	   ytitle("  ") ///
 	   ylabel(1(1)`num', valuelabel labsize(tiny) angle(horiz)) ///
        xtitle("   ") plotregion(color(white)) graphregion(color(white)) ///
-	   xscale(noline axis(2)) ///
-	   xlabel(0(0.1)1, axis(1) format(%2.1f) labsize(tiny)) ///
-	   xlabel(0 " " 0.85 "poor" 0.92 "moderate" 0.96 "substantial" 0.995 "perfect" 1 " ", axis(2) noticks labsize(tiny) angle(45)) ///
+	   xlabel(0(0.1)1, format(%2.1f) labsize(tiny)) ///
        name(`hc2', replace)	      
-graph display, ysize(`ysize') xsize(16)
-graph save `hc2', replace
-graph export `hc2'.pdf, replace  
-graph export `hc2'.jpg, height(5000) replace
-}
 
-graph close _all
+graph display, ysize(`ysize') xsize(16)
+graph save "$RESULTS/`hc2'", replace
+graph export "$RESULTS/`hc2'.tif", width(5000) replace  
+
+}
