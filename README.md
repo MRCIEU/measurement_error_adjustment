@@ -18,11 +18,14 @@ global CODE “/your/code/path/and/folder”
 Must have the following data files:
 
 Tab delimited text file of UK Biobank phenotype data
+
 Text file list of withdrawn participants ids
+
 Data dictionary in csv format from the UK Biobank Showcase (www.ukbiobank.ac.uk>Data Showcase>Essential Information>Requesting data and using the UK Biobank showcase>Data Dictionary)
+
 Note - the code uses an extra file containing date fields from UK Biobank, which were not in the main file, but this is not necessary if all the required data is in the main file.
 
-Part 1 – Illustrative example of accounting for measurement error in exposure and confounders.
+# Part 1 – Illustrative example of accounting for measurement error in exposure and confounders.
 
 1.	getmodeldata.sh
 This selects the relevant data for the example from the main files using shell script only. It contains the variable list for relevant exposures and confounders that can be adapted for other models.
@@ -44,7 +47,7 @@ This calls Stata to run runmodels.do, which fits an unadjusted proportional haza
 Requires – modelfile_all.dta, modelfile_comp.dta and boots_1.dta to boots_10.dta
 Main output – results in runmodels.log
 
-Part 2 - Calculating ICC and correction factors for all UK Biobank continuous variables.
+# Part 2 - Calculating ICC and correction factors for all UK Biobank continuous variables.
 
 Process for baseline and online diet variables fields
 
