@@ -1,16 +1,17 @@
-/* Program to run initial exclusions on variable list from showcase, ready to then get the data */
-/* to run this do file you need to have Data_Dictionary_Showcase.csv uploaded */
-/* runs for allnew variables */
+/* varlist_01.do - Creates a variable list by running initial exclusions on the data dictionary */
+/* Requires - Data_Dictionary_Showcase.csv uploaded in DATA folder*/
+/* Main output - fields01.txt in RESULTS folder */
 
 global DATA "/user/work/kd18661/meas_error/data"
 global RESULTS "/user/work/kd18661/meas_error/results"
 
 cd $RESULTS
 
-  clear
+   clear
    import delimited "$DATA/Data_Dictionary_Showcase.csv", delimiter(",")
 
-  capture drop path link
+*remove unnecessary variables and create exclusion flag
+   capture drop path link
    gen excl=0
 
 *exclusion 1 - exclude those with no repeat measures
@@ -37,7 +38,8 @@ cd $RESULTS
    replace excl=5 if inlist(fieldid, 21611, 21621, 21622, 21625, 21631, 21634, 21642, 21651, 21661, 21662, 21663, 21664, 21665, 21666, 21671)
 
    tab excl
-  
+ 
+*categorize online diet variables separately 
    gen online=0
    replace online=1 if category==100090 | category==100097 | category==100098 ///
                        | (category>=100100 & category<=100112) | category==100114
@@ -49,7 +51,7 @@ cd $RESULTS
    disp "Number of variables excluded"
    count
 
-export delimited using "$RESULTS/excl_vars_list01.txt", delimiter(tab) replace
+   export delimited using "$RESULTS/excl_vars_list01.txt", delimiter(tab) replace
 
    use full_vars_list01, clear
    keep if excl==0
@@ -58,7 +60,7 @@ export delimited using "$RESULTS/excl_vars_list01.txt", delimiter(tab) replace
 
    save "used_vars_list01.dta", replace
 
-export delimited using "$RESULTS/used_vars_list01.txt", delimiter(tab) replace
+   export delimited using "$RESULTS/used_vars_list01.txt", delimiter(tab) replace
 
 *check how many have multiple readings in arrays
    disp "Number with multiple in arrays"
@@ -66,28 +68,29 @@ export delimited using "$RESULTS/used_vars_list01.txt", delimiter(tab) replace
    sort category fieldid
    keep if array>1
 
-export delimited using "$RESULTS/arrays01.txt", delimiter(tab) replace
+   export delimited using "$RESULTS/arrays01.txt", delimiter(tab) replace
 
-*input date fields (only the main date is available not the diet date)
+*input date fields (only the main date is available not the diet date which is in a separate file)
    clear
    input fieldid array
      53 1
    end
    save datefields01.dta, replace
 
-*create fieldcodes for getting main data
+*create fieldcode list for getting main data
    use used_vars_list01, clear
 
 *add date fields
    append using datefields01
 
-*double the number of rows for the first 2 instances and the arrays
+*double the number of rows for the first 2 instances
    expand 2
    bysort fieldid: gen instnum=_n-1
 
-*for diet fields change instance to 1 and 2 instead of 0 and 1
+*for online diet fields change instance to 1 and 2 instead of 0 and 1
    replace instnum=instnum+1 if online==1  
 
+*increase the number of rows for the arrays
    expand array
    bysort fieldid instnum: gen arraynum=_n-1
 
@@ -95,10 +98,10 @@ export delimited using "$RESULTS/arrays01.txt", delimiter(tab) replace
    tostring instnum, replace
    tostring arraynum, replace
 
+*create field names to match UK Biobank file
    gen fieldcode="x" + fieldnum + "_" + instnum + "_" + arraynum
 
    drop fieldnum instnum arraynum instances online
-
    count
 
 export delimited using "$RESULTS/fields01.txt", delimiter(tab) replace

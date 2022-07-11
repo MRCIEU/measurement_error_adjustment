@@ -1,8 +1,9 @@
-/* this do file checks and removes 
+/* extraexcl_23.do - checks and removes
    a) variables with <20 distinct values per instance (for observations non missing in both instances)
    b) variables with less than 100 observations non missing in both instances
-   c) variables with >=20% of non missing observations having one single value (should be categorical) */
-/* instances 2+3 */
+   c) variables with >=20% of non missing observations having one single value (should be categorical) */ 
+/* Requires - mainfile23a.dta, mainfile23b.dta and mainfile23c.dta */
+/* Main output - finalfile23a.dta, finalfile23b.dta and finalfile23c.dta */
 
 global DATA "/user/work/kd18661/meas_error/data"
 global RESULTS "/user/work/kd18661/meas_error/results"
@@ -18,10 +19,11 @@ cd $RESULTS
   local inclcount=0
   local inclids=""
 
-foreach f in a b c {
+ foreach f in a b c {
 
   use mainfile23`f'.dta, clear
   order _all, alphabetic
+*put non-analytical variables first
   order eid assess_date2 assess_date3 assess_td diet_date2 diet_date3 diet_td
 
   ds
@@ -48,21 +50,25 @@ foreach f in a b c {
         local dcount`inst'=r(N)
      }
      local fnum=substr("`fieldname0'",2,strlen("`fieldname0'")-5)
+*exclude if fewer than 100 non-missing observations
      if `n'<100 {
         drop `fieldname0' `fieldname1'
         local exclncount=`exclncount'+1 
         local exclnids="`exclnids'" + "`fnum'" + " "
      }
+*exclude if fewer than 20 distinct values per instance
      else if `dcount0'<20 | `dcount1'<20 {
         drop `fieldname0' `fieldname1'
         local excldcount=`excldcount'+1
         local excldids="`excldids'" + "`fnum'" + " "
      }
+*exclude if >=20% of observations have a single value
      else if `pmax0'>=0.2 | `pmax1'>=0.2 {
         drop `fieldname0' `fieldname1'
         local exclpcount=`exclpcount'+1
         local exclpids="`exclpids'" + "`fnum'" + " "
      }
+*otherwise include
      else {
         local inclcount=`inclcount'+1
         local inclids="`inclids'" + "`fnum'" + " "
@@ -72,7 +78,7 @@ foreach f in a b c {
   }
 
   save $RESULTS/finalfile23`f'.dta, replace
-}
+ }
 
   di "Number of fields dropped due to less than 100 repeated values is `exclncount'"
   di "These are `exclnids'"

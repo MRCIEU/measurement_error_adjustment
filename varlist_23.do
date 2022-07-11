@@ -1,6 +1,6 @@
-/* Program to run initial exclusions on variable list from showcase, ready to then get the data */
-/* to run this do file you need to have Data_Dictionary_Showcase.csv uploaded */
-/* runs for allnew variables */
+/* varlist_23.do - Creates a variable list by running initial exclusions on the data dictionary */ 
+/* Requires - Data_Dictionary_Showcase.csv uploaded in DATA folder*/
+/* Main output - fields23a.txt, fields23b.txt and fields23c.txt in RESULTS folder */
 
 global DATA "/user/work/kd18661/meas_error/data"
 global RESULTS "/user/work/kd18661/meas_error/results"
@@ -56,7 +56,7 @@ export delimited using "$RESULTS/excl_vars_list_23.txt", delimiter(tab) replace
 
    save "used_vars_list23.dta", replace
 
-export delimited using "$RESULTS/used_vars_list23.txt", delimiter(tab) replace
+   export delimited using "$RESULTS/used_vars_list23.txt", delimiter(tab) replace
 
 *check how many have multiple readings in arrays
    disp "Number with multiple in arrays"
@@ -66,17 +66,17 @@ export delimited using "$RESULTS/used_vars_list23.txt", delimiter(tab) replace
 
 export delimited using "$RESULTS/arrays_23.txt", delimiter(tab) replace
 
-*input date fields (only the main date is available not the diet date)
+*input date fields (only the main date is available not the diet date which is in a separate file)
    clear
    input fieldid array
      53 1
    end
    save datefields23.dta, replace
 
-*create fieldcodes for getting main data
+*create fieldcodes for getting main data, split into 3 files due to limit of number of variables allowed in Stata
 
-use used_vars_list23, clear
-keep if _n<1000
+   use used_vars_list23, clear
+   keep if _n<1000
 
 *add date fields
    append using datefields23
@@ -100,8 +100,8 @@ keep if _n<1000
 
 export delimited using "$RESULTS/fields23a.txt", delimiter(tab) replace
 
-use used_vars_list23, clear
-keep if _n>=1000 &_n<2000
+   use used_vars_list23, clear
+   keep if _n>=1000 &_n<2000
 
 *add date fields
    append using datefields23
@@ -123,10 +123,10 @@ keep if _n>=1000 &_n<2000
 
    count
 
-export delimited using "$RESULTS/fields23b.txt", delimiter(tab) replace
+   export delimited using "$RESULTS/fields23b.txt", delimiter(tab) replace
 
-use used_vars_list23, clear
-keep if _n>=2000
+   use used_vars_list23, clear
+   keep if _n>=2000
 
 *add date fields
    append using datefields23
@@ -148,5 +148,5 @@ keep if _n>=2000
 
    count
 
-export delimited using "$RESULTS/fields23c.txt", delimiter(tab) replace
+   export delimited using "$RESULTS/fields23c.txt", delimiter(tab) replace
 

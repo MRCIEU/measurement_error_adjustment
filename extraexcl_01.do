@@ -1,21 +1,14 @@
-/* this do file checks and removes 
+/* extraexcl_01.do - checks and removes 
    a) variables with <20 distinct values per instance (for observations non missing in both instances)
    b) variables with less than 100 observations non missing in both instances
    c) variables with >=20% of non missing observations having one single value (should be categorical) */
+/* Requires - mainfile01.dta */
+/* Main output - finalfile01.dta */
 
 global DATA "/user/work/kd18661/meas_error/data"
 global RESULTS "/user/work/kd18661/meas_error/results"
 
 cd $RESULTS
-
-use mainfile01.dta, clear
-order _all, alphabetic
-order eid assess_date0 assess_date1 assess_td diet_date1 diet_date2 diet_td
-
-ds
-local fidlist=r(varlist)
-local numvars=wordcount("`fidlist'")
-disp "Number of variables = `numvars'"
 
 local exclncount=0
 local excldcount=0
@@ -34,8 +27,18 @@ local dexclpids=""
 local dinclcount=0
 local dinclids=""
 
+use mainfile01.dta, clear
+order _all, alphabetic
+*put non-analytical variables first
+order eid assess_date0 assess_date1 assess_td diet_date1 diet_date2 diet_td
+
+ds
+local fidlist=r(varlist)
+local numvars=wordcount("`fidlist'")
+disp "Number of variables = `numvars'"
+
 *cycle through all except eid and date fields
-forvalues vnum=8(2)`numvars' {
+ forvalues vnum=8(2)`numvars' {
    di "`vnum' of `numvars'"
    local fieldname0=word("`fidlist'",`vnum')
    local fieldname1=word("`fidlist'",`vnum'+1)
@@ -54,6 +57,7 @@ forvalues vnum=8(2)`numvars' {
    }
    local fnum=substr("`fieldname0'",2,strlen("`fieldname0'")-5)
    local inum=substr("`fieldname0'",-3,1)
+*exclude if fewer than 100 non-missing observations
    if `n'<100 {
       drop `fieldname0' `fieldname1'
       if `inum'==1 {
@@ -65,6 +69,7 @@ forvalues vnum=8(2)`numvars' {
         local exclnids="`exclnids'" + "`fnum'" + " "
       }
    }
+*exclude if fewer than 20 distinct values per instance
    else if `dcount0'<20 | `dcount1'<20 {
       drop `fieldname0' `fieldname1'
       if `inum'==1 {
@@ -76,6 +81,7 @@ forvalues vnum=8(2)`numvars' {
         local excldids="`excldids'" + "`fnum'" + " "
       }
    }
+*exclude if >=20% of observations have a single value
    else if `pmax0'>=0.2 | `pmax1'>=0.2 {
       drop `fieldname0' `fieldname1'
       if `inum'==1 {
@@ -87,6 +93,7 @@ forvalues vnum=8(2)`numvars' {
         local exclpids="`exclpids'" + "`fnum'" + " "
       }
    }
+*otherwise include
    else {
       if `inum'==1 {
         local dinclcount=`dinclcount'+1
@@ -99,24 +106,24 @@ forvalues vnum=8(2)`numvars' {
    }
    drop tag0 tag1 include x0 x1
    macro drop n dcount0 dcount1 pmax0 pmax1 fnum
-}
+ }
 
-di "Number of fields dropped due to less than 100 repeated values is `exclncount'"
-di "These are `exclnids'"
-di "Number of fields dropped due to fewer than 20 distinct values is `excldcount'"
-di "These are `excldids'"
-di "Number of fields dropped due to at least 20% with same value is `exclpcount'"
-di "These are `exclpids'"
-di "The remaining `inclcount' fields are `inclids'" 
+ save $RESULTS/finalfile01.dta, replace
 
-di "Number of diet fields dropped due to less than 100 repeated values is `dexclncount'"
-di "These are `dexclnids'"
-di "Number of diet fields dropped due to fewer than 20 distinct values is `dexcldcount'"
-di "These are `dexcldids'"
-di "Number of diet fields dropped due to at least 20% with same value is `dexclpcount'"
-di "These are `dexclpids'"
-di "The remaining `dinclcount' diet fields are `dinclids'"
+ di "Number of fields dropped due to less than 100 repeated values is `exclncount'"
+ di "These are `exclnids'"
+ di "Number of fields dropped due to fewer than 20 distinct values is `excldcount'"
+ di "These are `excldids'"
+ di "Number of fields dropped due to at least 20% with same value is `exclpcount'"
+ di "These are `exclpids'"
+ di "The remaining `inclcount' fields are `inclids'" 
 
+ di "Number of diet fields dropped due to less than 100 repeated values is `dexclncount'"
+ di "These are `dexclnids'"
+ di "Number of diet fields dropped due to fewer than 20 distinct values is `dexcldcount'"
+ di "These are `dexcldids'"
+ di "Number of diet fields dropped due to at least 20% with same value is `dexclpcount'"
+ di "These are `dexclpids'"
+ di "The remaining `dinclcount' diet fields are `dinclids'"
 
-save $RESULTS/finalfile01.dta, replace
 

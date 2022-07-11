@@ -1,6 +1,4 @@
-/* runs the remaining do files */
-/* need to have run the getdata_23.sh */
-/* need to have mainfile01.txt */
+/* rundata_23.do - Calls the remaining do files */
 
 global DATA "/user/work/kd18661/meas_error/data"
 global RESULTS "/user/work/kd18661/meas_error/results"

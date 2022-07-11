@@ -11,12 +11,12 @@
 
 echo Start Time:$(date)
 
+#getdata_23.sh - Extracts required variables from UK Biobank file 
+#Requires - fields23a.txt, fields23b.txt and fields23c.txt in RESULTS folder, ukbdata_new.txt in DATA folder
+#Main output - mainfile23a.txt, mainfile23b.txt and mainfile23c.txt in RESULTS folder
+
 echo 'getdata_23.sh'
-
 cd /user/work/kd18661/meas_error/results
-
-echo "this program needs the files fields23a.txt and b and c, and ukbdata_new.txt"
-
 echo Getdata23 $(date)
 echo Get list of the variable names and their column positions
 head -n 1 /user/work/kd18661/meas_error/data/ukbdata_new.txt | sed 's/\t/\n/g' > header23.txt

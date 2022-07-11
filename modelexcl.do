@@ -1,5 +1,7 @@
-/* this excludes the ids who have withdrawn consent and adds on the dates */
-/* need modelfile.txt from getmodeldata.sh and withdrawal file w16729_20220222.csv */
+/* modelexcl.do - Excludes withdrawn participants and renames and formats variables */
+/*                Creates mortality outcomes and confoudners */
+/* Requires - modelfile.txt and withdrawal file w16729_20220222.csv */
+/* Main output - modelfile_all.dta and modelfile_comp.dta */
 
 global DATA "/user/work/kd18661/meas_error/data"
 global RESULTS "/user/work/kd18661/meas_error/results"

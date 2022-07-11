@@ -1,6 +1,6 @@
-/* bootmodels1 - creates 1st 1,000 bootstrap replicates for the regression calibration */
+/* bootmodels6 - creates 6tht 1,000 bootstrap replicates for the regression calibration */
 /* Requires - modelfile_comp.dta */
-/* Main output - boots_1.dta */
+/* Main output - boots_6.dta */
 
 global DATA "/user/work/kd18661/meas_error/data"
 global RESULTS "/user/work/kd18661/meas_error/results"
@@ -60,7 +60,7 @@ cd $RESULTS
   simulate corre_all=r(corre_all) correc_all=r(correc_all) ///
 	corre_cvd=r(corre_cvd) correc_cvd=r(correc_cvd) ///
 	corre_cancer=r(corre_cancer) correc_cancer=r(correc_cancer) ///
-	, reps(1000) nodots seed(12643) saving(boots_1.dta, replace) : mybootbris1
+	, reps(1000) nodots seed(12454) saving(boots_6.dta, replace) : mybootbris1
 
   di "done"
 
