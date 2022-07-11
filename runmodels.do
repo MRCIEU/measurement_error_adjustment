@@ -1,5 +1,5 @@
 /* runmodels.do - This fits unadjusted proportional hazard model along with models adjusted for random measurement error */ 
-/* Requires - modelfile_all.dta, modelfile_comp.dta and boots_1a.dta, boots_1b.dta to boots_5a.dta, boots_5b.dta */
+/* Requires - modelfile_all.dta, modelfile_comp.dta and boots_1.dta to boots_10.dta */
 /* Main output - results in runmodels.log */
 
 global DATA "/user/work/kd18661/meas_error/data"
@@ -158,7 +158,7 @@ postclose results
      
 *use boostrap replicates for regression calibration CIs (remember to amend sample size n)
    clear
-   append using boots_1a boots_1b boots_2a boots_2b boots_3a boots_3b boots_4a boots_4b boots_5a boots_5b 
+   append using boots_1 boots_2 boots_3 boots_4 boots_5 boots_6 boots_7 boots_8 boots_9 boots_10 
    save boots10000.dta, replace
 
    bstat corre_all correc_all corre_cvd correc_cvd corre_cancer correc_cancer, stat(observed') n(317917)
