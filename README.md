@@ -17,8 +17,6 @@ Set directories at the top of the Stata do files with your own path and folders 
 global DATA "/your/data/path/and/folder"
 
 global RESULTS "/your/results/path/and/folder"
-
-global CODE “/your/code/path/and/folder”
 ```
 
 Must have the following data files:

@@ -1,20 +1,16 @@
-/* rundata_23.do - Calls the remaining do files */
+/* rundata_23.do - Calls the remaining do files in turn */
 
-global DATA "/user/work/kd18661/meas_error/data"
-global RESULTS "/user/work/kd18661/meas_error/results"
-global CODE "/user/home/kd18661/meas_error/code/measurement_error_adjustment"
+do "withdrawals_23.do"
 
-do "$CODE/withdrawals_23.do"
+do "dates_23.do"
 
-do "$CODE/dates_23.do"
+do "arrays_23.do"
 
-do "$CODE/arrays_23.do"
+do "recodes_23.do"
 
-do "$CODE/recodes_23.do"
+do "extraexcl_23.do"
 
-do "$CODE/extraexcl_23.do"
-
-do "$CODE/concord_23.do"
+do "concord_23.do"
 
 
 
