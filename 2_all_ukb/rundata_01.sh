@@ -13,7 +13,7 @@ echo Start Time:$(date)
 
 cd "${SLURM_SUBMIT_DIR}"
 
-module load apps/stata/16
+module load apps/stata/17
 
 echo Run rundata_01.do $(date)
 stata -b rundata_01.do

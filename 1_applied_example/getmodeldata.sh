@@ -23,21 +23,27 @@ head -n 1 /user/work/kd18661/meas_error/data/ukbdata_new.txt | sed 's/\t/\n/g' >
 awk '{print NR "\t" $s}' /user/work/kd18661/meas_error/data/head.txt > /user/work/kd18661/meas_error/data/head2.txt
 
 
-# fill in fields required below, main exposure field here is CRP 30710
-# outcome is from 40000 date of death, 40001 primary cause of death, 40007 age at death (and age to calculate survival)
+# fill in fields required below, main exposure fields are CRP 30710, vitamin D 30890, and SBP 4080, 12674 and 12697
+# Red blood cell Distribution Width 30070
+# outcome is from 40000 date of death, 53 date of assessment centre, 105010 date of diet questionnaire
 # confounders are 31 sex, 1558 alcohol, 21000 ethnicity, 21001 BMI, 21003 age, 2897/20116/20160/20161 smoking, 
-#                 20414/20416 alcohol, 26410/26426/26437 deprivation
+#                 20414/20416 alcohol, 26410/26426/26427 deprivation
 cat << EOF > /user/work/kd18661/meas_error/data/examplevars.txt
 x31_0_0
 x53_0_0
+x1558_0_0
 x2897_0_0
 x2897_1_0
-x1558_0_0
+x4080_0_0
+x4080_1_0
+x12674_2_0
+x12674_3_0
+x12697_2_0
+x12697_3_0
 x21000_0_0
 x21001_0_0
 x21001_1_0
 x21003_0_0
-x21000_0_0
 x20116_0_0
 x20116_1_0
 x20160_0_0
@@ -49,13 +55,13 @@ x20416_0_0
 x26410_0_0
 x26426_0_0
 x26427_0_0
+x30070_0_0
+x30070_1_0
 x30710_0_0
 x30710_1_0
-x30710_2_0
-x30710_3_0
+x30890_0_0
+x30890_1_0
 x40000_0_0
-x40001_0_0
-x40007_0_0
 EOF
 
 cat /user/work/kd18661/meas_error/data/examplevars.txt

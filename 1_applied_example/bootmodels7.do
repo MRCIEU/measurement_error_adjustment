@@ -1,5 +1,5 @@
-/* bootmodels7 - creates 7th 1,000 bootstrap replicates for the regression calibration */
-/* Requires - modelfile_comp.dta */
+/* bootmodels7 - creates 1st 1,000 bootstrap replicates for the regression calibration */
+/* Requires - modelfile_all.dta */
 /* Main output - boots_7.dta */
 
 global DATA "/user/work/kd18661/meas_error/data"
@@ -8,61 +8,64 @@ global RESULTS "/user/work/kd18661/meas_error/results"
 cd $RESULTS
 
 *bootstrapping for regression calibration CIs
-  capture program drop mybootbris1
-  program define mybootbris1, rclass
+capture program drop mybootbris
+program define mybootbris, rclass
 
-  use modelfile_comp.dta, clear
+foreach var in crp bvitd rdw {
+  use modelfile_all.dta, clear
 
-  bsample 
+  *keep complete data for expoaures and confounders
+  drop if `var'0==. | sex==. | ethnic2==. | smoking0==. | drink==. | deprive==. | age==. | bmi0==.
 
-*predictions for regression calibration
+  bsample
 
-*CRP with confounders
-  quietly regress crp1 crp0 deprive age i.sex i.ethnic2 bmi0 smoking0 i.drink
-  predict crp_hat, xb
+  *predictions for regression calibration
 
-*BMI with other confounders and exposure
-  quietly regress bmi1 bmi0 crp0 deprive age i.sex i.ethnic2 smoking0 i.drink
-  predict bmi_hat, xb
+  *outcomes with confounders
+    regress `var'1 `var'0 deprive age i.sex i.ethnic2 bmi0 smoking0 i.drink
+    predict `var'_hat, xb
 
-*smoke pack with other confounders and exposure
-  quietly regress smokpack1 smokpack0 crp0 deprive age i.sex i.ethnic2 bmi0 i.drink
-  predict smokpack_hat, xb
+  *confounders for each outcome
+  *BMI with other confounders and exposure
+    regress bmi1 bmi0 `var'0 deprive age i.sex i.ethnic2 smoking0 i.drink
+    predict `var'_bmi_hat, xb
 
-  gen smoking_hat=smokpack_hat
-  replace smoking_hat = . if smokever0==. & smokpack_hat==.
-  replace smoking_hat = 0 if smokever0==0 & smokpack_hat==.
-  replace smoking_hat = . if smokever0==1 &smokagestop0<=0 & smokpack_hat==.
-  replace smoking_hat = 0 if smokever0==1 &smokagestop0>0 &smokagestop0<=16 & smokpack_hat==.
-  replace smoking_hat = . if smokever0==1 &smokagestop0>16 &smokagestop0<. & smokpack_hat==.
-  replace smoking_hat = . if smokever0==1 &smokagestop0==. & smokpack_hat==.
-  sum smoking_hat
+  *smoke pack with other confounders and exposure
+    regress smokpack1 smokpack0 `var'0 deprive age i.sex i.ethnic2 bmi0 i.drink
+    predict `var'_smokpack_hat, xb
 
-  foreach mort in all cvd cancer {
+    gen `var'_smoking_hat=`var'_smokpack_hat
+    replace `var'_smoking_hat = . if smokever0==. & `var'_smokpack_hat==.
+    replace `var'_smoking_hat = 0 if smokever0==0 & `var'_smokpack_hat==.
+    replace `var'_smoking_hat = . if smokever0==1 &smokagestop0<=0 & `var'_smokpack_hat==.
+    replace `var'_smoking_hat = 0 if smokever0==1 &smokagestop0>0 &smokagestop0<=16 & `var'_smokpack_hat==.
+    replace `var'_smoking_hat = . if smokever0==1 &smokagestop0>16 &smokagestop0<. & `var'_smokpack_hat==.
+    replace `var'_smoking_hat = . if smokever0==1 &smokagestop0==. & `var'_smokpack_hat==.
+    sum `var'_smoking_hat
 
-*set survival parameters
-    stset time, failure(mort_`mort')
+  *set survival parameters
+    stset time, failure(mort_all)
 
-*Model 2 - regression calibrated model with correction for exposure
-    quietly stcox crp_hat deprive age i.sex i.ethnic2 bmi0 smoking0 i.drink
+  *Model 2 - regression calibrated model with correction for exposure
+    quietly stcox `var'_hat deprive age i.sex i.ethnic2 bmi0 smoking0 i.drink
     matrix define A=r(table)
-    return scalar corre_`mort' = el(A,1,1)
+    return scalar corre_`var' = el(A,1,1)
  
-*Model 3 - regression calibrated model with correction for crp and smoking and bmi
-    quietly stcox crp_hat deprive age i.sex i.ethnic2 bmi_hat smoking_hat i.drink
+  *Model 3 - regression calibrated model with correction for crp and smoking and bmi
+    quietly stcox `var'_hat deprive age i.sex i.ethnic2 `var'_bmi_hat `var'_smoking_hat i.drink
     matrix define B=r(table)
-    return scalar correc_`mort' = el(B,1,1)
+    return scalar correc_`var' = el(B,1,1)
 
-  }
+}
 
-  end
+end
 
-  simulate corre_all=r(corre_all) correc_all=r(correc_all) ///
-	corre_cvd=r(corre_cvd) correc_cvd=r(correc_cvd) ///
-	corre_cancer=r(corre_cancer) correc_cancer=r(correc_cancer) ///
-	, reps(1000) nodots seed(32546) saving(boots_7.dta, replace) : mybootbris1
+simulate corre_crp=r(corre_crp) correc_crp=r(correc_crp) ///
+     corre_bvitd=r(corre_bvitd) correc_bvitd=r(correc_bvitd) ///
+     corre_rdw=r(corre_rdw) correc_rdw=r(correc_rdw) ///
+     , reps(1000) nodots seed(32546) saving(boots_7.dta, replace) : mybootbris
 
-  di "done"
+di "done"
 
 
 

@@ -13,73 +13,84 @@ cd $RESULTS
  sort f_eid
  rename f_eid eid
  save withdrawals.dta, replace
-
+    
+* get diet date from dates file
+ import delimited eid x53_0_0 x53_1_0 x53_2_0 x53_3_0 x21842_0_0 x21842_1_0 x21842_2_0 x21842_3_0 x105010_0_0 x105010_1_0 ///
+    x105010_2_0 x105010_3_0 x105010_4_0 using "$DATA/new_dates_data.csv", delimiter(",") rowr(2) clear
+ sort eid
+ keep eid x105010_1_0
+ save dietdate.dta, replace 
+    
 * read in model data to stata and merge out withdrawals
 import delimited using "$RESULTS/modelfile.txt", delimiter(tab) clear
 sort eid
 merge 1:1 eid using withdrawals.dta, keep(master) nogen // master only i.e. not in withdrawal file
+merge 1:1 eid using dietdate.dta, keep(match master) nogen // keep all that were in main file  
 
 gen assess_date=date(x53_0_0,"YMD")
 format assess_date %td
 summ assess_date
-
+  
+gen diet_date=date(x105010_1_0,"YMD###")
+format diet_date %td
+summ diet_date
+   
 gen death_date=date(x40000_0_0,"YMD")
 format death_date %td
 summ death_date
 
-drop x53_0_0  x40000_0_0
+drop x53_0_0 x40000_0_0 x105010_1_0
 
-rename x30710_0_0 crp0
-rename x30710_1_0 crp1
 rename x31_0_0 sex
+rename x1558_0_0 drink
+rename x2897_0_0 smokagestop0
+rename x2897_1_0 smokagestop1
+rename x4080_0_0 sbp0
+rename x4080_1_0 sbp1
+rename x12674_2_0 sbp_pwa0
+rename x12674_3_0 sbp_pwa1
+rename x12697_2_0 sbp_i0
+rename x12697_3_0 sbp_i1
 rename x21000_0_0 ethnic
 rename x21001_0_0 bmi0
 rename x21001_1_0 bmi1
 rename x21003_0_0 age
-rename x2897_0_0 smokagestop0
-rename x2897_1_0 smokagestop1
 rename x20116_0_0 smokstat0
 rename x20116_1_0 smokstat1
 rename x20160_0_0 smokever0
 rename x20160_1_0 smokever1
 rename x20161_0_0 smokpack0
 rename x20161_1_0 smokpack1
-rename x1558_0_0 drink
 rename x20414_0_0 alcfreq
 rename x20416_0_0 alcfreq6
 rename x26410_0_0 deprive_eng
 rename x26426_0_0 deprive_wal
 rename x26427_0_0 deprive_sco
-rename x40007_0_0 deathage
-rename x40001_0_0 icd
+rename x30070_0_0 rdw0
+rename x30070_1_0 rdw1
+rename x30710_0_0 crp0
+rename x30710_1_0 crp1
+rename x30890_0_0 bvitd0
+rename x30890_1_0 bvitd1
 
 save modelfile.dta, replace
 
 use modelfile.dta, clear
 
-*outcomes
-gen icdshort=substr(icd,1,3)
-tab icdshort
-gen icdcat=substr(icd,1,1)
-gen icdnum=substr(icd,2,2)
-destring icdnum, replace
-tab icdcat
+list in 1/5
 
 *final censorship date 28feb2021 (22339 in stata)
 capture drop time
-drop if assess_date==.
+*drop if assess_date==.
 gen time=22339-assess_date
+gen timed=22339-diet_date
 *reset death date if after end of censorship
 replace death_date=. if death_date>22339
 replace time=death_date-assess_date if death_date<.
+replace timed=death_date-diet_date if death_date<.
 
 gen mort_all=0
 replace mort_all=1 if death_date<.
-gen mort_cvd=0
-replace mort_cvd=1 if death_date<. & icdcat=="I" & (icdnum<=9 | icdnum==11 | icdnum==13 | ///
-        (icdnum>=20 & icdnum<=51) | (icdnum>=60 & icdnum<=69))
-gen mort_cancer=0
-replace mort_cancer=1 if death_date<. & icdcat=="C"
 
 *confounders
 sum age
@@ -145,14 +156,10 @@ forvalues i=0/1 {
   replace smoking`i' = 0 if smokever`i'==1 &smokagestop`i'>0 &smokagestop`i'<=16 & smokpack`i'==.
   replace smoking`i' = -3 if smokever`i'==1 &smokagestop`i'>16 &smokagestop`i'<. & smokpack`i'==.
   replace smoking`i' = -4 if smokever`i'==1 &smokagestop`i'==. & smokpack`i'==.
-  tab smoking`i', missing
+  sum smoking`i'
   replace smoking`i'=. if smoking`i'<0
 }
 
 save modelfile_all.dta, replace
 
-*keep complete data
-drop if crp0==. | sex==. | ethnic2==. | smoking0==. | drink==. | deprive==. | bmi0==. | age==.
-
-save modelfile_comp.dta, replace
 

@@ -1,7 +1,3 @@
-/* graphs.do - Creates graphs for paper */
-/* Requires - concordance_output.xlsx (preferably updated with new short names) */
-/* Main output - various graph files */
-
 global DATA "/user/work/kd18661/meas_error/data"
 global RESULTS "/user/work/kd18661/meas_error/results"
 
