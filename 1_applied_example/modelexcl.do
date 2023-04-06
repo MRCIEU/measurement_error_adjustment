@@ -45,12 +45,6 @@ rename x31_0_0 sex
 rename x1558_0_0 drink
 rename x2897_0_0 smokagestop0
 rename x2897_1_0 smokagestop1
-rename x4080_0_0 sbp0
-rename x4080_1_0 sbp1
-rename x12674_2_0 sbp_pwa0
-rename x12674_3_0 sbp_pwa1
-rename x12697_2_0 sbp_i0
-rename x12697_3_0 sbp_i1
 rename x21000_0_0 ethnic
 rename x21001_0_0 bmi0
 rename x21001_1_0 bmi1
